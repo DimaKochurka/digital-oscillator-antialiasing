@@ -4,9 +4,6 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-# EXPERIMENT CONFIGURATION
-
 SAMPLE_RATE = 48000
 
 TEST_FREQUENCIES = [
@@ -27,9 +24,6 @@ PLOTS_DIRECTORY = (
 
 PLOTS_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
-
-# SPECTRAL METRICS
-
 def analyze_spectrum(
     samples,
     reference,
@@ -43,7 +37,7 @@ def analyze_spectrum(
             "Signal and reference must have equal lengths."
         )
 
-    # Check coherent sampling.
+    # Require coherent sampling to avoid FFT leakage.
     cycles = fundamental * N / sample_rate
 
     if abs(cycles - round(cycles)) > 1e-9:
@@ -51,11 +45,10 @@ def analyze_spectrum(
             f"Non-coherent sampling: {fundamental} Hz"
         )
 
-    # Compute FFT.
     spectrum = np.fft.rfft(samples)
     reference_spectrum = np.fft.rfft(reference)
 
-    # Harmonics strictly below Nyquist.
+    # Include only harmonics strictly below Nyquist.
     nyquist = sample_rate / 2
 
     harmonic_numbers = np.arange(
@@ -71,7 +64,7 @@ def analyze_spectrum(
         harmonic_frequencies * N / sample_rate
     ).astype(int)
 
-    # One-sided energy weighting.
+    # Compensate for negative-frequency energy in the one-sided FFT.
     weights = np.full(len(spectrum), 2.0)
     weights[0] = 1.0
 
@@ -80,7 +73,7 @@ def analyze_spectrum(
 
     energy = weights * np.abs(spectrum) ** 2
 
-    # Separate desired and undesired components.
+    # Exclude DC; aliased energy overlapping harmonic bins is not detected.
     desired_mask = np.zeros(
         len(spectrum),
         dtype=bool
@@ -111,7 +104,6 @@ def analyze_spectrum(
     else:
         asr_db = -np.inf
 
-    # Harmonic magnitude error relative to reference.
     amplitudes = np.abs(
         spectrum[harmonic_bins]
     )
@@ -135,9 +127,6 @@ def analyze_spectrum(
         "harmonic_frequencies": harmonic_frequencies,
         "hme_db": hme_db
     }
-
-
-# DATA ANALYSIS
 
 asr_summary = []
 hme_summary = []
@@ -188,7 +177,6 @@ for fundamental in TEST_FREQUENCIES:
             f"ASR = {metrics['asr_db']:9.2f} dB"
         )
 
-        # Store individual harmonic magnitude errors.
         for k, freq, error in zip(
             metrics["harmonic_numbers"],
             metrics["harmonic_frequencies"],
@@ -201,9 +189,6 @@ for fundamental in TEST_FREQUENCIES:
                 "harmonic_frequency_hz": float(freq),
                 "hme_db": float(error)
             })
-
-
-# EXPORT RESULTS
 
 def export_csv(path, rows, fieldnames):
 
@@ -221,7 +206,6 @@ def export_csv(path, rows, fieldnames):
 
         writer.writeheader()
         writer.writerows(rows)
-
 
 export_csv(
     RESULTS_DIRECTORY / "asr_summary.csv",
@@ -246,9 +230,6 @@ export_csv(
 )
 
 print("\nCSV summaries exported successfully.")
-
-
-# ASR IMPROVEMENT TABLE
 
 print("\nASR IMPROVEMENT: Naive vs PolyBLEP")
 print("-" * 50)
@@ -275,9 +256,6 @@ for fundamental in TEST_FREQUENCIES:
         f"{fundamental:5} Hz | "
         f"Improvement: {improvement:+8.2f} dB"
     )
-
-
-# ASR VISUALIZATION
 
 plt.figure(figsize=(11, 6))
 

@@ -58,7 +58,6 @@ public static class OscillatorBenchmark
 
         var cases = CreateCases();
 
-        // Warm up all configurations before measurements.
         Console.WriteLine("Warming up all oscillators...");
 
         for (int round = 0; round < WarmupRounds; round++)
@@ -76,7 +75,7 @@ public static class OscillatorBenchmark
 
         for (int round = 0; round < MeasuredRounds; round++)
         {
-            // Shuffle the order between measurement rounds.
+            // Randomize case order to reduce systematic timing bias.
             var shuffled = cases
                 .OrderBy(_ => random.Next())
                 .ToList();
@@ -120,8 +119,11 @@ public static class OscillatorBenchmark
                 .OrderBy(x => x)
                 .ToArray();
 
-            double median =
-                (values[49] + values[50]) / 2.0;
+            int middle = values.Length / 2;
+
+            double median = values.Length % 2 == 0
+                ? (values[middle - 1] + values[middle]) / 2.0
+                : values[middle];
 
             writer.WriteLine(
                 $"{testCase.Frequency}," +
@@ -146,7 +148,6 @@ public static class OscillatorBenchmark
 
         foreach (long frequency in TestFrequencies)
         {
-            // Naive
             var naive = new NaiveSawtooth(
                 SampleRate, frequency);
 
@@ -159,7 +160,6 @@ public static class OscillatorBenchmark
                 () => naive.Reset(),
                 () => naive.GenerateInto(naiveBuffer)));
 
-            // PolyBLEP
             var poly = new PolyBlepSawtooth(
                 SampleRate, frequency);
 
@@ -172,7 +172,6 @@ public static class OscillatorBenchmark
                 () => poly.Reset(),
                 () => poly.GenerateInto(polyBuffer)));
 
-            // Additive BL
             var additive = new BandLimitedSawtooth(
                 SampleRate, frequency);
 

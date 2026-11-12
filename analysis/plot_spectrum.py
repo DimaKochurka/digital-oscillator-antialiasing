@@ -35,32 +35,12 @@ signals = {
     "Additive BL": data["additive"]
 }
 
-# Check periodicity of the naive oscillator
-naive = signals["Naive"]
-repetition_length = 120
-
-difference = (
-    naive[repetition_length:]
-    - naive[:-repetition_length]
-)
-
-print(
-    "Maximum periodicity error:",
-    np.max(np.abs(difference))
-)
-
-print("Sample 0:", naive[0])
-print("Sample 120:", naive[120])
-print("Sample 240:", naive[240])
-
-# FFT frequency bins.
 N = len(data)
 frequencies = np.fft.rfftfreq(
     N,
     d=1 / sample_rate
 )
 
-# Expected harmonic frequencies below Nyquist
 harmonic_frequencies = np.arange(
     fundamental,
     nyquist,
@@ -86,7 +66,6 @@ for ax, (name, samples) in zip(axes, signals.items()):
     spectrum = np.fft.rfft(samples)
     amplitude = np.abs(spectrum) / N
 
-    # Single-sided amplitude normalization
     if N % 2 == 0:
         amplitude[1:-1] *= 2
     else:
@@ -96,7 +75,7 @@ for ax, (name, samples) in zip(axes, signals.items()):
         np.maximum(amplitude, 1e-12)
     )
 
-    # Keep only local spectral peaks
+    # Plot local spectral peaks instead of every FFT bin.
     peak_mask = np.zeros(
         len(db),
         dtype=bool
@@ -119,7 +98,7 @@ for ax, (name, samples) in zip(axes, signals.items()):
         linewidth=0.9
     )
 
-    # Mark expected harmonics
+    # Mark the expected harmonics below Nyquist.
     for freq in harmonic_frequencies:
         ax.axvline(
             freq,
@@ -134,7 +113,6 @@ for ax, (name, samples) in zip(axes, signals.items()):
     ax.set_ylim(-120, 5)
     ax.grid(True, alpha=0.2)
 
-# Label the first five harmonics
 harmonics = np.arange(1, 6)
 harmonic_freqs = harmonics * fundamental
 
@@ -165,7 +143,6 @@ fig.suptitle(
     fontsize=14
 )
 
-# Export figure
 fig.savefig(
     output_path,
     dpi=300,

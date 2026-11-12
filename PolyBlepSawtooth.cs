@@ -8,6 +8,7 @@
             sampleRate, frequency);
     }
 
+    // Corrects the sawtooth discontinuity near the phase wrap.
     private static double PolyBlep(double t, double dt)
     {
         if (t < dt)

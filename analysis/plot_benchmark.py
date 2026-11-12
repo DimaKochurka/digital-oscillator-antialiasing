@@ -8,7 +8,6 @@ PLOTS_DIR = PROJECT_ROOT / "plots"
 
 PLOTS_DIR.mkdir(exist_ok=True)
 
-# Read C# benchmark results
 data = np.genfromtxt(
     RESULTS_DIR / "benchmark_results.csv",
     delimiter=",",
@@ -28,7 +27,6 @@ naive = get_times("Naive")
 polyblep = get_times("PolyBLEP")
 additive = get_times("Additive BL")
 
-# Figure 1: Absolute computational cost
 fig, (ax1, ax2) = plt.subplots(
     2, 1, figsize=(10, 8), sharex=True
 )
@@ -58,7 +56,6 @@ plt.savefig(
 )
 plt.show()
 
-# Figure 2: Relative computational cost
 poly_vs_naive = polyblep / naive
 additive_vs_poly = additive / polyblep
 

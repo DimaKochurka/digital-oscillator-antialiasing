@@ -81,8 +81,6 @@ plt.show()
 
 print(f"Plot saved to: {plot_path}")
 
-# HME DEVIATION FROM THEORETICAL CURVE
-
 sample_rate = 48000
 
 plt.figure(figsize=(12, 7))
@@ -97,9 +95,9 @@ for fundamental in test_frequencies:
     freqs = data["harmonic_frequency_hz"][mask]
     measured_hme = data["hme_db"][mask]
 
-    # Theoretical squared-sinc magnitude response.
     normalized_freq = freqs / sample_rate
 
+    # Compare measured HME with the squared-sinc reference in dB.
     theoretical_hme = 40 * np.log10(
         np.abs(np.sinc(normalized_freq))
     )

@@ -185,7 +185,7 @@ This metric allows the spectral results to be considered alongside the processin
 To better understand the harmonic attenuation observed in the PolyBLEP oscillator, its measured HME is also compared with a squared-sinc reference response:
 
 $$
-H(f)=\operatorname{sinc}^{2}\left(\frac{f}{f_s}\right)
+H(f)=\mathrm{sinc}^{2}\left(\frac{f}{f_s}\right)
 $$
 
 The corresponding magnitude response in decibels is:

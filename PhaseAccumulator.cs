@@ -28,6 +28,7 @@
         phasePosition = 0;
     }
 
+    // Integer phase accumulation avoids cumulative floating-point drift.
     public void Advance()
     {
         phasePosition += frequency;
